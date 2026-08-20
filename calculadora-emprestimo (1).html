@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Empréstimo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12161F;
+    --panel:#1A2030;
+    --ink:#EEF1F6;
+    --dim:#9CA3B5;
+    --line:#2B3347;
+    --blue:#4E8FE0;
+    --orange:#F0913D;
+    --green:#3FBE72;
+    --red:#E15C5C;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(ellipse at top, #1C2333 0%, var(--bg) 62%);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    display:flex;justify-content:center;
+    padding:28px 16px 60px;
+  }
+  .wrap{width:100%;max-width:460px;}
+
+  .hero{text-align:center;margin-bottom:24px;}
+  .eyebrow{
+    font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--orange);font-weight:700;margin-bottom:10px;
+  }
+  h1{
+    font-family:'Fraunces',serif;font-weight:900;
+    font-size:clamp(28px,7.5vw,36px);
+    margin:0 0 6px;line-height:1.05;letter-spacing:-0.01em;
+    color:var(--blue);
+  }
+  .sub{color:var(--dim);font-size:14px;max-width:320px;margin:0 auto;line-height:1.5;}
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:22px 20px;
+    margin-bottom:16px;
+  }
+  .field{margin-bottom:16px;}
+  .field:last-child{margin-bottom:0;}
+  label{
+    display:block;font-size:11.5px;font-weight:700;
+    color:var(--dim);text-transform:uppercase;letter-spacing:.08em;
+    margin-bottom:7px;
+  }
+  input[type="number"]{
+    width:100%;background:var(--bg);border:1.5px solid var(--line);
+    color:var(--ink);font-family:'Inter',sans-serif;font-weight:600;
+    font-size:17px;padding:12px 14px;border-radius:8px;
+    -webkit-appearance:none;appearance:none;
+  }
+  input:focus{outline:2px solid var(--blue);outline-offset:1px;border-color:var(--blue);}
+
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+  .toggle{
+    display:flex;background:var(--bg);border:1.5px solid var(--line);
+    border-radius:8px;overflow:hidden;
+  }
+  .toggle button{
+    flex:1;background:transparent;border:none;color:var(--dim);
+    font-family:'Inter',sans-serif;font-weight:700;font-size:13.5px;
+    padding:11px 6px;cursor:pointer;transition:background .2s,color .2s;
+  }
+  .toggle button.active{background:var(--blue);color:#0E141B;}
+
+  .calc-btn{
+    width:100%;background:var(--orange);color:#14100A;
+    border:none;border-radius:8px;padding:15px;
+    font-family:'Inter',sans-serif;font-weight:700;font-size:15px;
+    letter-spacing:.02em;cursor:pointer;margin-top:4px;
+    transition:transform .15s, filter .15s;
+  }
+  .calc-btn:active{transform:scale(.98);filter:brightness(.92);}
+
+  .result{display:none;animation:fadein .4s ease;}
+  .result.show{display:block;}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  .result-main{
+    background:var(--panel);border:2px solid var(--blue);
+    border-radius:12px;padding:22px 20px;text-align:center;margin-bottom:12px;
+    box-shadow:0 6px 20px rgba(0,0,0,.4);
+  }
+  .result-label{
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--blue);font-weight:700;margin-bottom:8px;
+  }
+  .result-value{
+    font-family:'Fraunces',serif;font-weight:800;font-size:38px;color:var(--ink);
+    line-height:1;
+  }
+  .result-note{font-size:12px;color:var(--dim);margin-top:6px;}
+
+  .breakdown{
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:18px 20px;
+  }
+  .bd-row{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:10px;}
+  .bd-row b{font-weight:800;}
+  .bd-row.b-green b{color:var(--green);}
+  .bd-row.b-red b{color:var(--red);}
+  .bar-track{height:14px;border-radius:7px;overflow:hidden;display:flex;background:var(--line);margin:12px 0 10px;}
+  .bar-principal{background:var(--green);height:100%;transition:width .5s ease;}
+  .bar-interest{background:var(--red);height:100%;transition:width .5s ease;}
+  .legend{display:flex;justify-content:space-between;font-size:11.5px;color:var(--dim);font-weight:600;}
+  .legend span::before{content:"●";margin-right:5px;font-size:10px;}
+  .legend .l-p::before{color:var(--green);}
+  .legend .l-i::before{color:var(--red);}
+
+  .sac-table{margin-top:14px;width:100%;border-collapse:collapse;font-size:12.5px;}
+  .sac-table th{
+    text-align:left;color:var(--dim);font-weight:700;font-size:10.5px;
+    text-transform:uppercase;letter-spacing:.05em;padding:6px 4px;
+    border-bottom:2px solid var(--blue);
+  }
+  .sac-table td{padding:7px 4px;border-bottom:1px solid var(--line);color:var(--ink);}
+  .sac-table tr:last-child td{border-bottom:none;}
+  .sac-note{font-size:11.5px;color:var(--dim);margin-top:8px;text-align:center;}
+
+  footer{text-align:center;color:var(--dim);font-size:11px;margin-top:22px;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Simulador financeiro</div>
+    <h1>Calculadora de<br>Empréstimo</h1>
+    <p class="sub">Informe o valor, a taxa e o prazo para simular suas parcelas.</p>
+  </div>
+
+  <div class="card">
+    <div class="field">
+      <label>Valor do empréstimo (R$)</label>
+      <input type="number" id="principal" min="0" step="0.01" value="10000" inputmode="decimal">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Taxa de juros ao mês (%)</label>
+        <input type="number" id="rate" min="0" step="0.01" value="2.5" inputmode="decimal">
+      </div>
+      <div class="field">
+        <label>Número de parcelas</label>
+        <input type="number" id="months" min="1" step="1" value="24" inputmode="numeric">
+      </div>
+    </div>
+    <div class="field">
+      <label>Sistema de amortização</label>
+      <div class="toggle" id="systemToggle">
+        <button data-val="price" class="active">Price (parcela fixa)</button>
+        <button data-val="sac">SAC (decrescente)</button>
+      </div>
+    </div>
+    <button class="calc-btn" id="calcBtn">Simular empréstimo</button>
+  </div>
+
+  <div class="result" id="result">
+    <div class="result-main">
+      <div class="result-label" id="mainLabel">Parcela mensal</div>
+      <div class="result-value" id="resValue">R$ 0,00</div>
+      <div class="result-note" id="resNote"></div>
+    </div>
+
+    <div class="breakdown">
+      <div class="bd-row b-green"><span>Total pago</span><b id="totalPaid">R$ 0,00</b></div>
+      <div class="bd-row b-red"><span>Total de juros</span><b id="totalInterest">R$ 0,00</b></div>
+      <div class="bar-track">
+        <div class="bar-principal" id="barPrincipal" style="width:0%"></div>
+        <div class="bar-interest" id="barInterest" style="width:0%"></div>
+      </div>
+      <div class="legend">
+        <span class="l-p">Valor emprestado</span>
+        <span class="l-i">Juros</span>
+      </div>
+
+      <div id="sacDetails" style="display:none;">
+        <table class="sac-table" id="sacTable">
+          <thead><tr><th>Parcela</th><th>Valor</th><th>Amortização</th><th>Juros</th></tr></thead>
+          <tbody id="sacBody"></tbody>
+        </table>
+        <div class="sac-note">Mostrando as 3 primeiras e as 3 últimas parcelas</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Simulação com juros compostos, sem considerar IOF, tarifas<br>
+    ou seguros. Valores reais dependem da instituição financeira.
+  </footer>
+</div>
+
+<script>
+  let system = 'price';
+
+  document.getElementById('systemToggle').addEventListener('click', e=>{
+    if(e.target.tagName!=='BUTTON')return;
+    system = e.target.dataset.val;
+    [...e.currentTarget.children].forEach(b=>b.classList.remove('active'));
+    e.target.classList.add('active');
+  });
+
+  function fmtBRL(v){
+    return v.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+  }
+
+  document.getElementById('calcBtn').addEventListener('click', ()=>{
+    const P = parseFloat(document.getElementById('principal').value);
+    const ratePct = parseFloat(document.getElementById('rate').value);
+    const n = parseInt(document.getElementById('months').value);
+    if(isNaN(P) || P<=0 || isNaN(ratePct) || ratePct<0 || isNaN(n) || n<1) return;
+
+    const i = ratePct/100;
+    const sacDetails = document.getElementById('sacDetails');
+    const sacBody = document.getElementById('sacBody');
+    sacBody.innerHTML = '';
+
+    let totalPaid, totalInterest;
+
+    if(system === 'price'){
+      sacDetails.style.display = 'none';
+      const parcela = i===0 ? P/n : P * (i * Math.pow(1+i,n)) / (Math.pow(1+i,n) - 1);
+      totalPaid = parcela * n;
+      totalInterest = totalPaid - P;
+
+      document.getElementById('mainLabel').textContent = 'Parcela mensal (fixa)';
+      document.getElementById('resValue').textContent = fmtBRL(parcela);
+      document.getElementById('resNote').textContent = `${n}x de ${fmtBRL(parcela)}`;
+    } else {
+      const amort = P/n;
+      let saldo = P;
+      totalPaid = 0; totalInterest = 0;
+      const rows = [];
+      for(let k=1;k<=n;k++){
+        const juros = saldo * i;
+        const parcelaK = amort + juros;
+        totalPaid += parcelaK;
+        totalInterest += juros;
+        rows.push({n:k, parcela:parcelaK, amort:amort, juros:juros});
+        saldo -= amort;
+      }
+      const firstParcela = rows[0].parcela;
+      const lastParcela = rows[rows.length-1].parcela;
+
+      document.getElementById('mainLabel').textContent = '1ª parcela (decrescente)';
+      document.getElementById('resValue').textContent = fmtBRL(firstParcela);
+      document.getElementById('resNote').textContent = `Da 1ª de ${fmtBRL(firstParcela)} até a última de ${fmtBRL(lastParcela)}`;
+
+      sacDetails.style.display = 'block';
+      const showRows = rows.length <= 6 ? rows : [...rows.slice(0,3), ...rows.slice(-3)];
+      let lastN = 0;
+      showRows.forEach(r=>{
+        if(rows.length>6 && lastN && r.n - lastN > 1){
+          const trGap = document.createElement('tr');
+          trGap.innerHTML = `<td colspan="4" style="text-align:center;color:var(--dim);">···</td>`;
+          sacBody.appendChild(trGap);
+        }
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${r.n}</td><td>${fmtBRL(r.parcela)}</td><td>${fmtBRL(r.amort)}</td><td>${fmtBRL(r.juros)}</td>`;
+        sacBody.appendChild(tr);
+        lastN = r.n;
+      });
+    }
+
+    document.getElementById('totalPaid').textContent = fmtBRL(totalPaid);
+    document.getElementById('totalInterest').textContent = fmtBRL(totalInterest);
+
+    const pPct = Math.max(0, Math.min(100, (P/totalPaid)*100));
+    document.getElementById('barPrincipal').style.width = pPct+'%';
+    document.getElementById('barInterest').style.width = (100-pPct)+'%';
+
+    document.getElementById('result').classList.add('show');
+    document.getElementById('result').scrollIntoView({behavior:'smooth', block:'nearest'});
+  });
+</script>
+</body>
+</html>
